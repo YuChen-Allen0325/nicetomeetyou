@@ -1,0 +1,1 @@
+0 * * * * curl http://127.0.0.1:80/nba/cron_job/ >> /app/cron_output.log 2>&1 

@@ -1,0 +1,29 @@
+FROM python:3.9.19-slim-bullseye
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends tzdata procps cron && \
+    apt-get clean && \
+    apt-get install -y curl && \
+    rm -rf /var/lib/apt/lists/*
+
+ENV TZ Asia/Taipei
+
+WORKDIR /app
+COPY requirements.txt /app/
+RUN pip install --upgrade pip
+RUN pip3 install -r requirements.txt
+
+COPY . /app
+COPY mycron /etc/cron.d/mycron
+
+RUN chmod 0644 /etc/cron.d/mycron && \
+    crontab /etc/cron.d/mycron \
+    service cron restart
+
+RUN python manage.py makemigrations && \
+    python manage.py migrate
+
+EXPOSE 8000
+
+CMD python manage.py runserver 0.0.0.0:8000
+
